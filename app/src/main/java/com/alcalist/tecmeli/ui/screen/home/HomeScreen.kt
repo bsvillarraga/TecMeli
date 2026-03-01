@@ -7,7 +7,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.alcalist.tecmeli.core.network.AppError
 import com.alcalist.tecmeli.core.util.UiState
+import com.alcalist.tecmeli.ui.components.ErrorState
 import com.alcalist.tecmeli.ui.screen.home.components.ProductList
 import com.alcalist.tecmeli.ui.screen.home.components.SearchBarComponent
 
@@ -47,17 +49,18 @@ fun HomeScreen(
                         ProductList(products = state.data, onItemClick = navigateToDetail)
                     }
                     is UiState.Error -> {
-                        Text(
-                            text = state.message,
-                            color = MaterialTheme.colorScheme.error,
-                            modifier = Modifier.align(Alignment.Center).padding(16.dp)
+                        ErrorState(
+                            error = (state.exception as? AppError) ?: AppError.Unknown(state.exception ?: Exception(state.message)),
+                            onRetry = { viewModel.searchProducts(query) }
                         )
                     }
                     is UiState.Empty -> {
-                        Text(
-                            text = if (query.isEmpty()) "Comienza a buscar productos" else "No se encontraron resultados",
-                            modifier = Modifier.align(Alignment.Center)
-                        )
+                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            Text(
+                                text = if (query.isEmpty()) "Comienza a buscar productos" else "No se encontraron resultados para \"$query\"",
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                        }
                     }
                 }
             }

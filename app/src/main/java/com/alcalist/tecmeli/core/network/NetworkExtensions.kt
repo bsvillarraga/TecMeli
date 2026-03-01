@@ -1,26 +1,23 @@
 package com.alcalist.tecmeli.core.network
 
-import android.util.Log
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import com.alcalist.tecmeli.core.network.executor.SafeApiCallExecutor
+import com.alcalist.tecmeli.core.network.handler.DefaultHttpResponseHandler
+import com.alcalist.tecmeli.core.network.logger.DefaultNetworkLogger
+import com.alcalist.tecmeli.core.network.mapper.DefaultErrorMapper
 import retrofit2.Response
 
+/**
+ * Función de alto nivel para ejecutar llamadas de red de forma segura.
+ * Mantiene compatibilidad con código existente.
+ */
 suspend fun <T, R> safeApiCall(
     call: suspend () -> Response<T>,
     transform: (T) -> R
-): Result<R> = withContext(Dispatchers.IO) {
-    try {
-        val response = call()
-        val body = response.body()
-        Log.e("safeApiCall", "Response: $body")
-
-        if (response.isSuccessful && body != null) {
-            Result.success(transform(body))
-        } else {
-            val errorMsg = "Error: ${response.code()} ${response.message()}"
-            Result.failure(Exception(errorMsg))
-        }
-    } catch (e: Exception) {
-        Result.failure(e)
-    }
+): Result<R> {
+    val executor = SafeApiCallExecutor(
+        responseHandler = DefaultHttpResponseHandler(),
+        errorMapper = DefaultErrorMapper(),
+        logger = DefaultNetworkLogger()
+    )
+    return executor.execute(call, transform)
 }

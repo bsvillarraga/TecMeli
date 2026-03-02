@@ -16,12 +16,22 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
 
+/**
+ * Módulo de Hilt encargado de proveer las dependencias relacionadas con la red.
+ *
+ * Configura el cliente HTTP, los interceptores de seguridad, el autenticador
+ * y las instancias de Retrofit para las diferentes APIs de la aplicación.
+ * Todas las instancias se mantienen como [Singleton] para optimizar recursos.
+ */
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
 
     private const val BASE_URL = "https://api.mercadolibre.com/"
 
+    /**
+     * Provee la configuración base de la API extrayendo valores de [BuildConfig].
+     */
     @Provides
     @Singleton
     fun provideApiConfig(): ApiConfig {
@@ -32,6 +42,9 @@ object NetworkModule {
         )
     }
 
+    /**
+     * Configura un interceptor para registrar las peticiones y respuestas HTTP en consola.
+     */
     @Provides
     @Singleton
     fun provideLoggingInterceptor(): HttpLoggingInterceptor {
@@ -40,6 +53,13 @@ object NetworkModule {
         }
     }
 
+    /**
+     * Configura el cliente principal de OkHttp con seguridad y logs.
+     *
+     * @param authInterceptor Agrega el token de acceso a las cabeceras.
+     * @param tokenAuthenticator Gestiona la renovación automática de tokens (401).
+     * @param loggingInterceptor Registra el tráfico de red.
+     */
     @Provides
     @Singleton
     fun provideOkHttpClient(
@@ -54,6 +74,9 @@ object NetworkModule {
             .build()
     }
 
+    /**
+     * Provee la instancia base de Retrofit configurada con Gson.
+     */
     @Provides
     @Singleton
     fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
@@ -64,12 +87,21 @@ object NetworkModule {
             .build()
     }
 
+    /**
+     * Crea la implementación de la API de productos de Mercado Libre.
+     */
     @Provides
     @Singleton
     fun provideMeliApi(retrofit: Retrofit): MeliApi {
         return retrofit.create(MeliApi::class.java)
     }
 
+    /**
+     * Crea una instancia de Retrofit específica para procesos de autenticación.
+     *
+     * Se utiliza un cliente de OkHttp simplificado (sin interceptor de auth) para evitar
+     * bucles infinitos durante la renovación del token.
+     */
     @Provides
     @Singleton
     fun provideAuthApi(loggingInterceptor: HttpLoggingInterceptor): AuthApi {

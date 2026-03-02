@@ -6,7 +6,21 @@ import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.POST
 
+/**
+ * Interfaz de Retrofit que define los endpoints para el proceso de autenticación de Mercado Libre.
+ *
+ * Se encarga de gestionar la obtención y renovación de tokens de acceso mediante el flujo OAuth 2.0.
+ */
 interface AuthApi {
+    /**
+     * Solicita un nuevo token de acceso utilizando un token de actualización (refresh token).
+     *
+     * @param grantType Tipo de concesión (por defecto "refresh_token").
+     * @param clientId Identificador de la aplicación cliente.
+     * @param clientSecret Clave secreta de la aplicación cliente.
+     * @param refreshToken Token de actualización previamente obtenido.
+     * @return [Response] que contiene un [AuthResponseDto] con los nuevos tokens.
+     */
     @POST("oauth/token")
     @FormUrlEncoded
     suspend fun refreshToken(

@@ -10,16 +10,29 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
+/**
+ * Módulo de Hilt encargado de la vinculación (binding) de las interfaces de repositorio
+ * con sus implementaciones concretas.
+ *
+ * Utiliza la anotación [@Binds] para inyectar implementaciones en lugar de crearlas manualmente,
+ * lo cual es más eficiente en términos de código generado por Dagger.
+ */
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class RepositoryModule {
 
+    /**
+     * Vincula la interfaz [TokenRepository] con su implementación [TokenRepositoryImpl].
+     */
     @Binds
     @Singleton
     abstract fun bindTokenRepository(
         tokenRepositoryImpl: TokenRepositoryImpl
     ): TokenRepository
 
+    /**
+     * Vincula la interfaz [ProductRepository] con su implementación [ProductRepositoryImpl].
+     */
     @Binds
     @Singleton
     abstract fun bindProductRepository(

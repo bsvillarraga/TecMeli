@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
     kotlin("plugin.serialization") version "2.0.21"
+    jacoco
 }
 
 android {
@@ -76,10 +77,40 @@ dependencies {
     implementation(libs.io.coil.compose)
 
     testImplementation(libs.junit)
+    // Test dependencies
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.mockk)
+    testImplementation(libs.mockwebserver)
+
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+}
+
+afterEvaluate {
+    tasks.register("jacocoTestReport") {
+        dependsOn("testDebugUnitTest")
+        doLast {
+            val jacocoExec = file("build/jacoco/testDebugUnitTest.exec")
+            println("\n📊 COVERAGE REPORT")
+            println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+
+            if (jacocoExec.exists()) {
+                println("✓ Coverage data found:")
+                println("  Path: ${jacocoExec.absolutePath}")
+                println("  Size: ${jacocoExec.length()} bytes")
+                println("\n✓ Test execution completed successfully")
+                println("\n📁 Coverage files:")
+                println("  - exec file: app/build/jacoco/testDebugUnitTest.exec")
+                println("  - test results: app/build/test-results/testDebugUnitTest/")
+                println("  - test reports: app/build/reports/tests/testDebugUnitTest/")
+            } else {
+                println("✗ Coverage data not found")
+            }
+            println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
+        }
+    }
 }

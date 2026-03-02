@@ -9,8 +9,8 @@ import java.net.SocketTimeoutException
  */
 class DefaultErrorMapper : ErrorMapper {
     override fun mapException(exception: Exception): AppError = when (exception) {
-        is SocketTimeoutException -> AppError.Timeout
-        is IOException -> AppError.Network
+        is SocketTimeoutException -> AppError.Timeout()
+        is IOException -> AppError.Network()
         else -> AppError.Unknown(exception)
     }
 }

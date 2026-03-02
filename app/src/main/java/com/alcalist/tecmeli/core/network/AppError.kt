@@ -5,8 +5,8 @@ package com.alcalist.tecmeli.core.network
  * técnicas de la lógica de negocio y UI.
  */
 sealed class AppError : Exception() {
-    object Network : AppError()
-    object Timeout : AppError()
+    class Network : AppError()
+    class Timeout : AppError()
     data class Server(val code: Int, val msg: String) : AppError()
     data class Unknown(val throwable: Throwable) : AppError()
 }

@@ -27,7 +27,7 @@
 | **UI** | Jetpack Compose + Material 3 |
 | **DI** | Dagger Hilt |
 | **Red** | Retrofit + OkHttp + Gson |
-| **Arquitectura** | Clean Architecture + MVVM + UDF |
+| **Arquitectura** | Clean Architecture + MVVM |
 | **Testing** | MockK + MockWebServer + JUnit |
 
 ---

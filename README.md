@@ -39,34 +39,32 @@ El proyecto utiliza una estructura de **Clean Architecture** optimizada para el 
 ### 📊 Diagrama de Componentes y Flujo Auth (mermaid)
 
 ```mermaid
-graph TD
-    subgraph UI ["Capa de Presentación"]
-        A[Compose Screens] --> B[ViewModels]
-    end
-
-    subgraph Domain ["Capa de Dominio"]
-        B --> C[Use Cases]
-        C --> D[Repository Interfaces]
-        C --> E[Domain Models]
-    end
-
-    subgraph Data ["Capa de Datos"]
-        F[ProductRepositoryImpl] -- implementa --> D
-        G[TokenRepositoryImpl] -- implementa --> D
-        F --> H[MeliApi]
-        G --> I[AuthApi]
-    end
-
-    subgraph Core ["Core / Network Security"]
-        J[AuthInterceptor] -- 1. Inyecta Bearer Token --> H
-        K[TokenAuthenticator] -- 2. Captura 401 Error --> H
-        K -- 3. Solicita Refresh --> G
-        K -- 4. Reintenta Petición --> H
-    end
-
-    UI --> Domain
-    Data --> Domain
-    Core -. Intercepta .-> Data
+flowchart TB
+ subgraph app["Módulo app"]
+        UI["UI - Jetpack Compose, Screens: Home, ProductDetail, NavigationWrapper"]
+        MainActivity["MainActivity, @AndroidEntryPoint"]
+        App["TecMeliApp, @HiltAndroidApp"]
+  end
+ subgraph data["Fuentes de datos"]
+        Remote["Remoto (Retrofit + OkHttp), ApiService, AuthInterceptor"]
+        TokenProvider["TokenProvider / Secure Storage"]
+  end
+ subgraph core["Core / utilidades"]
+        NetworkExec["SafeApiCallExecutor, DefaultHttpResponseHandler, NetworkLogger"]
+        UiState["UiState (sealed class)"]
+  end
+    UI -- consume StateFlow / eventos --> VM["ViewModels, (HomeViewModel,, ProductDetailViewModel)"]
+    MainActivity -- setContent --> UI
+    App -- inicializa --> DI["Hilt (SingletonComponent, Modules)"]
+    DI -.-> VM & Repo["Repo"] & Remote
+    VM -- llama --> UseCases["Domain - UseCases, (GetProductsUseCase,, GetProductDetailUseCase)"]
+    UseCases -- coordinan --> RepoInterfaces["Repositories (interfaces)"]
+    RepoInterfaces -- implementado por --> RepoImpls["Repositorios (implementaciones), ProductRepositoryImpl,, TokenRepositoryImpl"]
+    RepoImpls -- lee/escribe --> DataSources["Fuentes de datos"]
+    DataSources --> Remote
+    RepoImpls --> TokenProvider
+    Remote -- usa --> NetworkExec
+    VM -- expone --> UiState
 ```
 
 ### 🔐 Flujo de Seguridad (OAuth 2.0 Refresh)
